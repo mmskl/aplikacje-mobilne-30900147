@@ -1,0 +1,19 @@
+Zadanie aplikacji
+Wyświetlanie w różnych częściach ekranu zielonych i czerwonych przycisków przez 1 minutę.
+Użytkownik ma za zadanie naciskać tylko zielone przyciski.
+Zielonych przycisków może się pojawiać do 5 naraz - do zaliczania wykorzystać wielo-dotyk.
+
+Funkcjonalność
+
+    Rejestracja i logowanie użytkownika.
+    Zliczanie punktów
+
+    - Za każdy zielony - naciśnięty przycisk użytkownik dostaje 10 pkt
+    - Za każdy czerwony - naciśnięty przycisk użytkownik dostaje -5 pkt
+    - Przy wielo-dotyku ilość punktów za przycisk zielony = 10 x ilość_dotyków naraz.
+    - Przy wielo-dotyku ilość punktów za przycisk czerwony = -5 x ilość_dotyków naraz.
+
+    Zapis w bazie danych 3 ostatnich najlepszych wyników dla użytkownika.
+    Lista najlepszych wyników "Hall of fame" dla wszystkich użytkowników.
+    Informacje o aplikacji w opcji About.
+    Informacja o autorach projektu w samej aplikacji.
