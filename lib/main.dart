@@ -400,37 +400,52 @@ class Login extends StatefulWidget {
 }
  
 class _LoginState extends State<Login> {
-  TextEditingController nameController = TextEditingController();
-  String fullName = '';
-   
-      @override
-      Widget build(BuildContext context) {
-        return Scaffold(
-          appBar: AppBar(
-            title: Text('Flutter - tutorialkart.com'),
-          ),
-          body: Center(child: Column(children: <Widget>[
-            Container(
-              margin: EdgeInsets.all(20),
-              child: TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Full Name',
-                ),
-                onChanged: (text) {
-                  setState(() {
-                    fullName = text;
-                    //you can access nameController in its scope to get
-                    // the value of text entered as shown below
-                    //fullName = nameController.text;
-                  });
-                },
-              )),
-            Container(
-              margin: EdgeInsets.all(20),
-              child: Text(fullName),
-            )
-                ])));
-      }
+  String username = '';
+  String pin = '';
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Type your username and pin'),
+      ),
+      body: Center(child: Column(children: <Widget>[
+        Container(
+          margin: EdgeInsets.all(40),
+          child: TextField(
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: 'Username',
+            ),
+            onChanged: (text) {
+              setState(() {
+                username = text;
+              });
+            },
+          )),
+        Container(
+          margin: EdgeInsets.symmetric(vertical: 8.0),
+          child: TextField(
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: 'PIN',
+            ),
+            onChanged: (text) {
+              setState(() {
+                pin = text;
+              });
+            },
+          )),
+        Container(
+          margin: EdgeInsets.symmetric(vertical: 8.0),
+          child: TextButton(
+            style: ButtonStyle(
+              foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+            ),
+            onPressed: () { },
+            child: Text('TextButton'),
+          )
+          )
+      ])));
+  }
 }
