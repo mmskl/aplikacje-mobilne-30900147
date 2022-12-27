@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
 import 'dart:collection';
 import 'dart:math';
+import 'dart:async';
 
 void main() => runApp(App());
 
@@ -35,10 +36,13 @@ class NavDrawer extends StatelessWidget {
       child: ListView(
         /* padding: EdgeInsets.zero, */
         children: <Widget>[
-          DrawerHeader(
-            child: Text(
-              'Side menu',
-              style: TextStyle(color: Colors.white, fontSize: 15),
+          Container(
+            height: 55,
+            child: DrawerHeader(
+              child: Text(
+                'Menu',
+                style: TextStyle(fontSize: 15),
+              ),
             ),
           ),
           ListTile(
@@ -95,10 +99,46 @@ class _GameState extends State<Game> {
   bool _is_logged_in = false;
   String _who_is_logged_in = 'anonymous';
 
+
+  Timer? _timer;
+  Duration _playTime = Duration(seconds: 60);
+
+  void startTimer() {
+    _timer =
+        Timer.periodic(Duration(seconds: 1), (_) => setCountDown());
+  }
+  void stopTimer() {
+    setState(() => _timer!.cancel());
+  }
+  void resetTimer() {
+    stopTimer();
+    setState(() => _playTime = Duration(days: 5));
+  }
+  
+  void setCountDown() {
+    final reduceSecondsBy = 1;
+    setState(() {
+      final seconds = _playTime.inSeconds - reduceSecondsBy;
+      if (seconds < 0) {
+        _timer!.cancel();
+      } else {
+        _playTime = Duration(seconds: seconds);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer!.cancel();
+    super.dispose();
+  }
+
+
   void _startGame() {
     setState(() {
       _is_game_playing = true;
     });
+    startTimer();
   }
 
 
@@ -107,6 +147,15 @@ class _GameState extends State<Game> {
     if (_is_logged_in) { return false; }
 
     return true;
+  }
+
+
+  // just min and sec
+  String _printDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+    return "$twoDigitMinutes:$twoDigitSeconds";
   }
 
 
@@ -137,7 +186,7 @@ class _GameState extends State<Game> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AppBar Demo'),
+        title: const Text('Manual reflex analyzer'),
         actions: <Widget>[
           TextButton(
             style: style,
@@ -166,6 +215,16 @@ class _GameState extends State<Game> {
           ]
         )
       ),
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.white,
+        child: Container(
+          child: Text(_printDuration(_playTime),
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w500),
+          ),
+        ),
+      ),
       floatingActionButton: Visibility(
         visible: _showButton(),
         child:  FloatingActionButton.extended(
@@ -177,8 +236,6 @@ class _GameState extends State<Game> {
       );
   }
 }
-
-
 
 class About extends StatelessWidget {
   const About({super.key});
@@ -194,29 +251,68 @@ class About extends StatelessWidget {
     ];
 
     return Scaffold(
+      backgroundColor: Colors.grey[200],
       appBar: AppBar(
         title: Text('About'),
       ),
       body: Container(
-        alignment: Alignment.centerRight,
-        child: Align(
-          alignment: Alignment.centerRight,
-          child: ListView.builder(
-            itemCount: authors.length,
-            prototypeItem: ListTile(
-              title: Text(authors.first),
-            ),
-            itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(authors[index]),
-              );
-            },
-          ),
-        ),
-      ),
-    );
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        child: Stack(
+          alignment: AlignmentDirectional.center,
+          children: [
+            // This set the position of the inside Container to top-left
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
+              margin: const EdgeInsets.only(top: 60, bottom: 0, left: 10),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container( 
+                    child: Text(
+                      'About project',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w500),
+                    )),
+                  Container(
+                    child: Text(
+                      '\nManual reflex analyzer is supposed to check your skills by measuring how fast you\'re able to pick green and avoid red boxxes. It\'s a small project for school written in flutter without external libraries.',
+                      style:
+                      TextStyle(fontSize: 20, fontWeight: FontWeight.w300),
+                    )),
+                  Container(
+                    margin: const EdgeInsets.only(top: 30),
+                    child: Text('Authors:',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500)
+                    )
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: authors.length,
+                      itemBuilder: (context, index) {
+                        return Center(
+                          child: Text(authors[index], style: TextStyle(fontSize: 20, fontWeight: FontWeight.w300))
+                        );
+                      }
+                    )),
+                  ],
+                  ),
+                  ),
+                  ),
+
+
+                  ],
+                  ),
+                  ),
+                  );
   }
 }
+
+
 
 
 
