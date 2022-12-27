@@ -20,14 +20,11 @@ class App extends StatelessWidget {
         '/': (BuildContext context) => const Game(),
         '/hall-of-fame': (BuildContext context) => const HallOfFame(),
         '/about': (BuildContext context) => const About(),
+        '/login': (BuildContext context) => const Login(),
       },
-
     );
   }
 }
-
-
-
 
 class NavDrawer extends StatelessWidget {
   @override
@@ -55,8 +52,8 @@ class NavDrawer extends StatelessWidget {
             title: Text('Hall of Fame'),
             onTap: () {
               Navigator.of(context).pop();
-              Navigator.push(
-                context, MaterialPageRoute(builder: (context) => HallOfFame()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => HallOfFame()));
             },
           ),
           ListTile(
@@ -75,17 +72,15 @@ class NavDrawer extends StatelessWidget {
 }
 
 Map<String, int> sortMap(Map<String, int> data) {
-
-  var sortedEntries = data.entries.toList()..sort((e1, e2) {
-    var diff = e2.value.compareTo(e1.value);
-    if (diff == 0) diff = e2.key.compareTo(e1.key);
-    return diff;
-  });
+  var sortedEntries = data.entries.toList()
+    ..sort((e1, e2) {
+      var diff = e2.value.compareTo(e1.value);
+      if (diff == 0) diff = e2.key.compareTo(e1.key);
+      return diff;
+    });
 
   return Map<String, int>.fromEntries(sortedEntries);
 }
-
-
 
 class Game extends StatefulWidget {
   const Game({super.key});
@@ -100,42 +95,51 @@ class _GameState extends State<Game> {
   String _who_is_logged_in = 'anonymous';
   int _points = 0;
 
+  bool _showPlayButton = false;
+
   int _minus_points = -5;
   int _plus_points = 10;
-
+  int _max_at_once = 5;
 
   Random _rng = Random();
   Timer? _timer;
-  Duration _playTime = Duration(seconds: 60);
+  int _gameplay = 6;
+  Duration _playTime = Duration(seconds: 6);
 
-  List<Widget> _positioned = [];
+  List<Widget> _positioned = List.filled(5, new Container());
 
   void startTimer() {
-    _timer =
-        Timer.periodic(Duration(seconds: 1), (_) => setCountDown());
+    _timer = Timer.periodic(Duration(seconds: 1), (_) => setCountDown());
   }
+
   void stopTimer() {
     setState(() => _timer!.cancel());
   }
+
   void resetTimer() {
     stopTimer();
-    setState(() => _playTime = Duration(seconds: 60));
+    setState(() => _playTime = Duration(seconds: _gameplay));
   }
-  
 
-  Widget _getBlock(double w, double h, bool hasLuck) {
+  Widget _getBlock(double w, double h, bool hasLuck, int idx) {
     int pointsForUser = (hasLuck == true) ? _plus_points : _minus_points;
-    MaterialColor color = (hasLuck == true) ? Colors.green : Colors.red ;
+    MaterialColor color = (hasLuck == true) ? Colors.green : Colors.red;
 
-    var onBlockPressed = () { setState(() => _points = _points + pointsForUser); };
-
+    var onBlockPressed = () {
+      setState(() {
+        _points = _points + pointsForUser;
+        _positioned[idx] = new Container();
+      });
+    };
 
     return Positioned(
       top: h,
       left: w,
       child: TextButton(
         child: Text('      '),
-        onPressed: () { onBlockPressed(); },
+        onPressed: () {
+          onBlockPressed();
+        },
         style: TextButton.styleFrom(
           primary: color,
           backgroundColor: color,
@@ -145,21 +149,16 @@ class _GameState extends State<Game> {
     );
   }
 
-
   void setCountDown() {
-
-
     double height = (MediaQuery.of(context).size.height);
     double width = (MediaQuery.of(context).size.width);
 
     double wrand = _rng.nextDouble() * width;
     double hrand = _rng.nextDouble() * height;
 
+    // _positioned = [];
 
-    _positioned = [];
-
-    for( var i = 0 ; i <= 5; i++ ) {
-
+    for (var i = 0; i < _max_at_once; i++) {
       double wrand = _rng.nextDouble() * width;
       double hrand = _rng.nextDouble() * height;
       bool luck = false;
@@ -167,7 +166,7 @@ class _GameState extends State<Game> {
         luck = true;
       }
 
-      _positioned.add(_getBlock(wrand, hrand, luck));
+      _positioned[i] = _getBlock(wrand, hrand, luck, i);
     }
 
     final reduceSecondsBy = 1;
@@ -181,15 +180,15 @@ class _GameState extends State<Game> {
     });
 
     print("points: ${_points}");
-
   }
 
   @override
   void dispose() {
-    _timer!.cancel();
+    if (_timer != null) {
+      _timer!.cancel();
+    }
     super.dispose();
   }
-
 
   void _startGame() {
     setState(() {
@@ -198,14 +197,17 @@ class _GameState extends State<Game> {
     startTimer();
   }
 
-
-  bool _showButton() {
-    if (_is_game_playing) { return false; }
-    if (_is_logged_in) { return false; }
-
-    return true;
+  void _shouldShowPlayButton() {
+    if (_is_game_playing || !_is_logged_in) {
+      setState(() {
+        _showPlayButton = false;
+      });
+    } else {
+      setState(() {
+        _showPlayButton = true;
+      });
+    }
   }
-
 
   // just min and sec
   String _printStatusBar(Duration duration) {
@@ -217,7 +219,6 @@ class _GameState extends State<Game> {
 
   @override
   Widget build(BuildContext context) {
-
     final ButtonStyle style = TextButton.styleFrom(
       foregroundColor: Theme.of(context).colorScheme.onPrimary,
     );
@@ -225,11 +226,10 @@ class _GameState extends State<Game> {
     String main_message = '';
 
     if (_is_logged_in) {
-      main_message =  "hello, you currently play as ${_who_is_logged_in}";
+      main_message = "hello, you currently play as ${_who_is_logged_in}";
     } else {
-      main_message =  "To play you need to login";
+      main_message = "To play you need to login (click here)";
     }
-
 
     double height = (MediaQuery.of(context).size.height);
     double width = (MediaQuery.of(context).size.width);
@@ -237,43 +237,39 @@ class _GameState extends State<Game> {
     double wrand = _rng.nextDouble() * width;
     double hrand = _rng.nextDouble() * height;
 
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Manual reflex analyzer'),
         actions: <Widget>[
           TextButton(
             style: style,
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).pushReplacementNamed('/login');
+            },
             child: Text(main_message),
           ),
         ],
       ),
       drawer: NavDrawer(),
-      body: Container(
-        child: Stack(
-          children: _positioned
-        )
-      ),
+      body: Container(child: Stack(children: _positioned)),
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,
         child: Container(
-          child: Text(_printStatusBar(_playTime),
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w500),
+          child: Text(
+            _printStatusBar(_playTime),
+            style: TextStyle(fontSize: 28, fontWeight: FontWeight.w500),
           ),
         ),
       ),
       floatingActionButton: Visibility(
-        visible: _showButton(),
-        child:  FloatingActionButton.extended(
+        visible: _showPlayButton,
+        child: FloatingActionButton.extended(
           onPressed: _startGame,
           label: Text('Start game'),
           icon: Icon(Icons.sports_esports),
         ),
       ),
-      );
+    );
   }
 }
 
@@ -281,7 +277,6 @@ class About extends StatelessWidget {
   const About({super.key});
   @override
   Widget build(BuildContext context) {
-
     List<String> authors = [
       'Marcin Moskal',
       'Kacper Kromka',
@@ -302,101 +297,88 @@ class About extends StatelessWidget {
           alignment: AlignmentDirectional.center,
           children: [
             // This set the position of the inside Container to top-left
-          Align(
-            alignment: Alignment.topLeft,
-            child: Container(
-              margin: const EdgeInsets.only(top: 60, bottom: 0, left: 10),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container( 
-                    child: Text(
+            Align(
+              alignment: Alignment.topLeft,
+              child: Container(
+                margin: const EdgeInsets.only(top: 60, bottom: 0, left: 10),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                        child: Text(
                       'About project',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w500),
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
                     )),
-                  Container(
-                    child: Text(
+                    Container(
+                        child: Text(
                       '\nManual reflex analyzer is supposed to check your skills by measuring how fast you\'re able to pick green and avoid red boxxes. It\'s a small project for school written in flutter without external libraries.',
                       style:
-                      TextStyle(fontSize: 20, fontWeight: FontWeight.w300),
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.w300),
                     )),
-                  Container(
-                    margin: const EdgeInsets.only(top: 30),
-                    child: Text('Authors:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w500)
-                    )
-                  ),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: authors.length,
-                      itemBuilder: (context, index) {
-                        return Center(
-                          child: Text(authors[index], style: TextStyle(fontSize: 20, fontWeight: FontWeight.w300))
-                        );
-                      }
-                    )),
+                    Container(
+                        margin: const EdgeInsets.only(top: 30),
+                        child: Text('Authors:',
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.w500))),
+                    Expanded(
+                        child: ListView.builder(
+                            itemCount: authors.length,
+                            itemBuilder: (context, index) {
+                              return Center(
+                                  child: Text(authors[index],
+                                      style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w300)));
+                            })),
                   ],
-                  ),
-                  ),
-                  ),
-
-
-                  ],
-                  ),
-                  ),
-                  );
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
-
-
-
-
 
 class HallOfFame extends StatelessWidget {
   const HallOfFame({super.key});
   @override
   Widget build(BuildContext context) {
-
     // todo: get from shared_preferences
     Map<String, int> players = {
-        'Sterling': 65,
-          'Marquis': 55,
-          'Briar': 125,
-          'Asher': 36,
-          'Kori': 25,
-          'Dionte': 55,
-          'Korbin': 10,
-          'Ania': 15,
+      'Sterling': 65,
+      'Marquis': 55,
+      'Briar': 125,
+      'Asher': 36,
+      'Kori': 25,
+      'Dionte': 55,
+      'Korbin': 10,
+      'Ania': 15,
     };
 
     // topPlayers = sortMap(players);
 
+    // topPlayers.forEach((k,v) => {
+    //   print('klucz: ${k}: wartość: ${v}')
+    // });
 
-   // topPlayers.forEach((k,v) => {
-   //   print('klucz: ${k}: wartość: ${v}')
-   // }); 
-
-   
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'Hall of Fame',
           style: TextStyle(color: Colors.white, fontSize: 15),
-          ),
+        ),
       ),
       body: Container(
         child: Center(
-          child: DataTable(
-            columns: [
-              DataColumn(label: Text('name')),
-              DataColumn(label: Text('points')),
+          child: DataTable(columns: [
+            DataColumn(label: Text('name')),
+            DataColumn(label: Text('points')),
           ], rows: [
-            DataRow(cells: [ DataCell(Text('name1')),  DataCell(Text('1111'))]),
-            DataRow(cells: [ DataCell(Text('name1')),  DataCell(Text('2222'))]),
+            DataRow(cells: [DataCell(Text('name1')), DataCell(Text('1111'))]),
+            DataRow(cells: [DataCell(Text('name1')), DataCell(Text('2222'))]),
           ]),
         ),
       ),
@@ -404,3 +386,51 @@ class HallOfFame extends StatelessWidget {
   }
 }
 
+
+
+
+
+
+
+
+class Login extends StatefulWidget {
+  const Login({super.key});
+  @override
+  _LoginState createState() => _LoginState();
+}
+ 
+class _LoginState extends State<Login> {
+  TextEditingController nameController = TextEditingController();
+  String fullName = '';
+   
+      @override
+      Widget build(BuildContext context) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text('Flutter - tutorialkart.com'),
+          ),
+          body: Center(child: Column(children: <Widget>[
+            Container(
+              margin: EdgeInsets.all(20),
+              child: TextField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Full Name',
+                ),
+                onChanged: (text) {
+                  setState(() {
+                    fullName = text;
+                    //you can access nameController in its scope to get
+                    // the value of text entered as shown below
+                    //fullName = nameController.text;
+                  });
+                },
+              )),
+            Container(
+              margin: EdgeInsets.all(20),
+              child: Text(fullName),
+            )
+                ])));
+      }
+}
