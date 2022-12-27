@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
 import 'dart:collection';
+import 'dart:math';
 
 void main() => runApp(App());
 
@@ -125,6 +126,15 @@ class _GameState extends State<Game> {
       main_message =  "To play you need to login";
     }
 
+
+    double height = (MediaQuery.of(context).size.height);
+    double width = (MediaQuery.of(context).size.width);
+
+    var rng = Random();
+    double wrand = rng.nextDouble() * width;
+    double hrand = rng.nextDouble() * height;
+
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('AppBar Demo'),
@@ -137,23 +147,25 @@ class _GameState extends State<Game> {
         ],
       ),
       drawer: NavDrawer(),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+      body: Container(
+        child: Stack(
+          children: [
+            Positioned(
+              top: hrand,
+              left: wrand,
+              child: TextButton(
+                child: Text('      '),
+                onPressed: () { print('Pressed'); },
+                style: TextButton.styleFrom(
+                         primary: Colors.red,
+                         backgroundColor: Colors.red,
+                         onSurface: Colors.red,
+                       ),
+              ),
             ),
-            Text(
-              'oooooooooooo',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
+          ]
+        )
       ),
-
       floatingActionButton: Visibility(
         visible: _showButton(),
         child:  FloatingActionButton.extended(
