@@ -98,10 +98,17 @@ class _GameState extends State<Game> {
   bool _is_game_playing = false;
   bool _is_logged_in = false;
   String _who_is_logged_in = 'anonymous';
+  int _points = 0;
+
+  int _minus_points = -5;
+  int _plus_points = 10;
 
 
+  Random _rng = Random();
   Timer? _timer;
   Duration _playTime = Duration(seconds: 60);
+
+  List<Widget> _positioned = [];
 
   void startTimer() {
     _timer =
@@ -112,10 +119,57 @@ class _GameState extends State<Game> {
   }
   void resetTimer() {
     stopTimer();
-    setState(() => _playTime = Duration(days: 5));
+    setState(() => _playTime = Duration(seconds: 60));
   }
   
+
+  Widget _getBlock(double w, double h, bool hasLuck) {
+    int pointsForUser = (hasLuck == true) ? _plus_points : _minus_points;
+    MaterialColor color = (hasLuck == true) ? Colors.green : Colors.red ;
+
+    var onBlockPressed = () { setState(() => _points = _points + pointsForUser); };
+
+
+    return Positioned(
+      top: h,
+      left: w,
+      child: TextButton(
+        child: Text('      '),
+        onPressed: () { onBlockPressed(); },
+        style: TextButton.styleFrom(
+          primary: color,
+          backgroundColor: color,
+          onSurface: color,
+        ),
+      ),
+    );
+  }
+
+
   void setCountDown() {
+
+
+    double height = (MediaQuery.of(context).size.height);
+    double width = (MediaQuery.of(context).size.width);
+
+    double wrand = _rng.nextDouble() * width;
+    double hrand = _rng.nextDouble() * height;
+
+
+    _positioned = [];
+
+    for( var i = 0 ; i <= 5; i++ ) {
+
+      double wrand = _rng.nextDouble() * width;
+      double hrand = _rng.nextDouble() * height;
+      bool luck = false;
+      if (_rng.nextDouble() > 0.51) {
+        luck = true;
+      }
+
+      _positioned.add(_getBlock(wrand, hrand, luck));
+    }
+
     final reduceSecondsBy = 1;
     setState(() {
       final seconds = _playTime.inSeconds - reduceSecondsBy;
@@ -125,6 +179,9 @@ class _GameState extends State<Game> {
         _playTime = Duration(seconds: seconds);
       }
     });
+
+    print("points: ${_points}");
+
   }
 
   @override
@@ -151,14 +208,12 @@ class _GameState extends State<Game> {
 
 
   // just min and sec
-  String _printDuration(Duration duration) {
+  String _printStatusBar(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, "0");
     String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
     String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
-    return "$twoDigitMinutes:$twoDigitSeconds";
+    return "${twoDigitMinutes}:${twoDigitSeconds}, your points: ${_points}";
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -179,9 +234,8 @@ class _GameState extends State<Game> {
     double height = (MediaQuery.of(context).size.height);
     double width = (MediaQuery.of(context).size.width);
 
-    var rng = Random();
-    double wrand = rng.nextDouble() * width;
-    double hrand = rng.nextDouble() * height;
+    double wrand = _rng.nextDouble() * width;
+    double hrand = _rng.nextDouble() * height;
 
 
     return Scaffold(
@@ -198,27 +252,13 @@ class _GameState extends State<Game> {
       drawer: NavDrawer(),
       body: Container(
         child: Stack(
-          children: [
-            Positioned(
-              top: hrand,
-              left: wrand,
-              child: TextButton(
-                child: Text('      '),
-                onPressed: () { print('Pressed'); },
-                style: TextButton.styleFrom(
-                         primary: Colors.red,
-                         backgroundColor: Colors.red,
-                         onSurface: Colors.red,
-                       ),
-              ),
-            ),
-          ]
+          children: _positioned
         )
       ),
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,
         child: Container(
-          child: Text(_printDuration(_playTime),
+          child: Text(_printStatusBar(_playTime),
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w500),
