@@ -47,9 +47,9 @@ app.*.map.json
 
 ### CUSTOM
 # Ignore everything
-*
+/*
 # But not these files...
 !.gitignore
-!lib/main.dart
+!lib/
 !README.md
 !pubspec.yaml
