@@ -312,7 +312,7 @@ class About extends StatelessWidget {
                     )),
                     Container(
                         child: Text(
-                      '\nManual reflex analyzer is supposed to check your skills by measuring how fast you\'re able to pick green and avoid red boxxes. It\'s a small project for school written in flutter without external libraries.',
+                      '\nManual reflex analyzer is supposed to check your skills by measuring how fast you\'re able to pick green and avoid red boxes. It\'s a small project for school written in flutter without external libraries.',
                       style:
                           TextStyle(fontSize: 20, fontWeight: FontWeight.w300),
                     )),
