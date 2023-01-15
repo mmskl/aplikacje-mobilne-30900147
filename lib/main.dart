@@ -95,7 +95,7 @@ class _GameState extends State<Game> {
   String _who_is_logged_in = 'anonymous';
   int _points = 0;
 
-  bool _showPlayButton = false;
+  bool _showPlayButton = true;
 
   int _minus_points = -5;
   int _plus_points = 10;
@@ -103,13 +103,14 @@ class _GameState extends State<Game> {
 
   Random _rng = Random();
   Timer? _timer;
-  int _gameplay = 6;
-  Duration _playTime = Duration(seconds: 6);
+  int _gameplay = 60;
+  Duration _playTime = Duration(seconds: 60);
 
   List<Widget> _positioned = List.filled(5, new Container());
 
   void startTimer() {
-    _timer = Timer.periodic(Duration(seconds: 1), (_) => setCountDown());
+    var reduceBy = 2;
+    _timer = Timer.periodic(Duration(seconds: reduceBy), (_) => setCountDown());
   }
 
   void stopTimer() {
@@ -169,7 +170,7 @@ class _GameState extends State<Game> {
       _positioned[i] = _getBlock(wrand, hrand, luck, i);
     }
 
-    final reduceSecondsBy = 1;
+    final reduceSecondsBy = 2;
     setState(() {
       final seconds = _playTime.inSeconds - reduceSecondsBy;
       if (seconds < 0) {
@@ -207,6 +208,7 @@ class _GameState extends State<Game> {
         _showPlayButton = true;
       });
     }
+
   }
 
   // just min and sec
@@ -285,6 +287,14 @@ class About extends StatelessWidget {
       'Przemysław Frąszczak',
     ];
 
+
+    List<String> technologyStack = [
+      'Platform: Linux',
+      'Edytor: NeoVim',
+      'Main Technologies: Dart, Flutter',
+    ];
+
+
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
@@ -327,6 +337,22 @@ class About extends StatelessWidget {
                             itemBuilder: (context, index) {
                               return Center(
                                   child: Text(authors[index],
+                                      style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w300)));
+                            })),
+                    Container(
+                        margin: const EdgeInsets.only(top: 30),
+                        child: Text('Technology Stack:',
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.w500))),
+                    Expanded(
+
+                        child: ListView.builder(
+                            itemCount: technologyStack.length,
+                            itemBuilder: (context, index) {
+                              return Center(
+                                  child: Text(technologyStack[index],
                                       style: TextStyle(
                                           fontSize: 20,
                                           fontWeight: FontWeight.w300)));
@@ -377,8 +403,8 @@ class HallOfFame extends StatelessWidget {
             DataColumn(label: Text('name')),
             DataColumn(label: Text('points')),
           ], rows: [
-            DataRow(cells: [DataCell(Text('name1')), DataCell(Text('1111'))]),
-            DataRow(cells: [DataCell(Text('name1')), DataCell(Text('2222'))]),
+            DataRow(cells: [DataCell(Text('admin')), DataCell(Text('110'))]),
+            DataRow(cells: [DataCell(Text('john')), DataCell(Text('20'))]),
           ]),
         ),
       ),
@@ -407,45 +433,23 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Type your username and pin'),
+        title: Text(
+          'Login',
+          style: TextStyle(color: Colors.white, fontSize: 15),
+        ),
       ),
-      body: Center(child: Column(children: <Widget>[
-        Container(
-          margin: EdgeInsets.all(40),
-          child: TextField(
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Username',
-            ),
-            onChanged: (text) {
-              setState(() {
-                username = text;
-              });
-            },
-          )),
-        Container(
-          margin: EdgeInsets.symmetric(vertical: 8.0),
-          child: TextField(
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'PIN',
-            ),
-            onChanged: (text) {
-              setState(() {
-                pin = text;
-              });
-            },
-          )),
-        Container(
-          margin: EdgeInsets.symmetric(vertical: 8.0),
-          child: TextButton(
-            style: ButtonStyle(
-              foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
-            ),
-            onPressed: () { },
-            child: Text('TextButton'),
-          )
-          )
-      ])));
+      body: Container(
+        margin: EdgeInsets.all(40),
+        child: TextField(
+          decoration: InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'Username',
+          ),
+          onChanged: (text) {
+            setState(() {
+              username = text;
+            });
+          },
+        )));
   }
 }
